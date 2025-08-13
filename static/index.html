@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aizonix Solutions - Document-Based Chatbot Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 750px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 40px 40px;
+            animation: float 25s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-40px, -40px) rotate(360deg); }
+        }
+
+        .chat-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+        }
+
+        .chat-header p {
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .service-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 2;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00e676;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.6);
+            animation: pulse 2s infinite;
+            z-index: 2;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 35px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            animation: welcomeGlow 0.8s ease-out;
+        }
+
+        @keyframes welcomeGlow {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .welcome-card h3 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .welcome-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .service-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .service-tag {
+            background: rgba(102, 126, 234, 0.15);
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .message {
+            margin-bottom: 25px;
+            animation: messageSlide 0.4s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 75%;
+            padding: 18px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            line-height: 1.5;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 8px;
+        }
+
+        .bot .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-bottom-left-radius: 8px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 25px;
+            text-align: left;
+        }
+
+        .typing-indicator.active {
+            display: block;
+            animation: messageSlide 0.4s ease-out;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            padding: 18px 24px;
+            background: white;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 25px;
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dots span {
+            height: 10px;
+            width: 10px;
+            background: #667eea;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 3px;
+            animation: typing 1.6s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-12px); opacity: 1; }
+        }
+
+        .chat-input-container {
+            padding: 30px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input-wrapper {
+            position: relative;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: white;
+            border-radius: 30px;
+            padding: 8px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background: transparent;
+            color: #333;
+        }
+
+        .chat-input::placeholder {
+            color: #999;
+        }
+
+        .send-button {
+            width: 55px;
+            height: 55px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            border-radius: 50%;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .send-button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .send-button:hover::before {
+            opacity: 1;
+        }
+
+        .send-button:active {
+            transform: scale(0.98);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-button:disabled::before {
+            opacity: 0;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffecb3 100%);
+            color: #e65100;
+            padding: 18px 22px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #ff9800;
+            animation: messageSlide 0.4s ease-out;
+            font-weight: 500;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .connection-status.online {
+            background: rgba(0, 230, 118, 0.9);
+            color: white;
+        }
+
+        .connection-status.offline {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .quick-question {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            font-weight: 500;
+        }
+
+        .quick-question:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            
+            .chat-header {
+                padding: 25px 20px;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.7rem;
+            }
+            
+            .chat-header p {
+                font-size: 1rem;
+            }
+            
+            .message-bubble {
+                max-width: 90%;
+                font-size: 15px;
+                padding: 16px 20px;
+            }
+            
+            .chat-messages {
+                padding: 25px 20px;
+            }
+            
+            .chat-input-container {
+                padding: 20px;
+            }
+            
+            .service-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="status-indicator"></div>
+            <div class="service-badge">Consulting Chat</div>
+            <div class="connection-status" id="connectionStatus">Connecting...</div>
+            <h1>🤖 Aizonix Solutions</h1>
+            <p>Document-Based Chatbot Development & Integration Services</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-card">
+                <h3>🚀 Welcome to Aizonix Solutions!</h3>
+                <p>We specialize in creating intelligent document-based chatbots for businesses. Our solutions help organizations manage FAQs, compliance documents, company policies, and regulatory information through conversational AI.</p>
+                <div class="service-tags">
+                    <span class="service-tag">n8n Workflows</span>
+                    <span class="service-tag">FastAPI Backend</span>
+                    <span class="service-tag">Supabase + PostgreSQL</span>
+                    <span class="service-tag">Custom Frontend</span>
+                    <span class="service-tag">Document AI</span>
+                </div>
+                <div class="quick-questions">
+                    <div class="quick-question" onclick="sendQuickMessage('What services do you offer?')">What services do you offer?</div>
+                    <div class="quick-question" onclick="sendQuickMessage('How much does implementation cost?')">Pricing Information</div>
+                    <div class="quick-question" onclick="sendQuickMessage('What technology stack do you use?')">Technology Stack</div>
+                    <div class="quick-question" onclick="sendQuickMessage('How long does development take?')">Timeline</div>
+                </div>
+            </div>
+            
+            <div class="message bot">
+                <div class="message-bubble">
+                    Hello! 👋 I'm here to help you learn about Aizonix Solutions' document-based chatbot services.<br><br>
+                    We create intelligent chatbots that can answer questions from your company's documents, policies, compliance materials, and FAQs using advanced AI technology.<br><br>
+                    What would you like to know about our chatbot development services?
+                </div>
+                <div class="message-time">Just now</div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Ask about our chatbot development services, pricing, or technology..."
+                    autocomplete="off"
+                >
+                <button class="send-button" id="sendButton">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AizonixChatInterface {
+            constructor() {
+                this.chatMessages = document.getElementById('chatMessages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                this.connectionStatus = document.getElementById('connectionStatus');
+                
+                this.apiUrl = window.location.origin;
+                this.sessionId = this.generateSessionId();
+                
+                this.init();
+                this.checkConnection();
+                setInterval(() => this.checkConnection(), 30000);
+            }
+
+            init() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                this.messageInput.addEventListener('input', () => {
+                    this.sendButton.disabled = !this.messageInput.value.trim();
+                });
+
+                // Focus input on page load
+                setTimeout(() => {
+                    this.messageInput.focus();
+                }, 1000);
+            }
+
+            generateSessionId() {
+                return 'aizonix_client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            async checkConnection() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/health`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'healthy') {
+                        this.updateConnectionStatus('online', 'Online & Ready');
+                    } else {
+                        this.updateConnectionStatus('offline', 'Service Unavailable');
+                    }
+                } catch (error) {
+                    this.updateConnectionStatus('offline', 'Disconnected');
+                }
+            }
+
+            updateConnectionStatus(status, text) {
+                this.connectionStatus.className = `connection-status ${status}`;
+                this.connectionStatus.textContent = text;
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                this.messageInput.value = '';
+                this.sendButton.disabled = true;
+
+                this.addMessage(message, 'user');
+                this.showTypingIndicator();
+
+                try {
+                    const response = await fetch(`${this.apiUrl}/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            sessionId: this.sessionId,
+                            context: 'aizonix_services_consultation'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Simulate realistic response time
+                    const thinkingTime = Math.random() * 2000 + 1500; // 1.5-3.5 seconds
+                    
+                    setTimeout(() => {
+                        this.hideTypingIndicator();
+                        this.addMessage(data.response, 'bot');
+                    }, thinkingTime);
+
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    this.showError('Unable to connect to our services. Please check your connection or contact us directly for assistance.');
+                    console.error('Chat error:', error);
+                }
+
+                this.sendButton.disabled = false;
+            }
+
+            addMessage(content, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Format content for better display
+                const formattedContent = this.formatMessage(content);
+                
+                messageDiv.innerHTML = `
+                    <div class="message-bubble">
+                        ${formattedContent}
+                    </div>
+                    <div class="message-time">${currentTime}</div>
+                `;
+
+                this.chatMessages.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            formatMessage(content) {
+                // Basic formatting for better readability
+                content = this.escapeHtml(content);
+                content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                content = content.replace(/\n/g, '<br>');
+                return content;
+            }
+
+            showTypingIndicator() {
+                this.typingIndicator.classList.add('active');
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                this.typingIndicator.classList.remove('active');
+            }
+
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <strong>Connection Issue:</strong> ${message}
+                `;
+                
+                this.chatMessages.appendChild(errorDiv);
+                this.scrollToBottom();
+
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 8000);
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }, 100);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Global function for quick questions
+        function sendQuickMessage(message) {
+            const chatInterface = window.aizonixChat;
+            if (chatInterface) {
+                chatInterface.messageInput.value = message;
+                chatInterface.sendMessage();
+            }
+        }
+
+        // Initialize the chat interface when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.aizonixChat = new AizonixChatInterface();
+        });
+    </script>
+</body>
+</html>
