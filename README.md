@@ -16,13 +16,29 @@ An intelligent document-based chatbot system that helps organizations manage FAQ
 
 ```mermaid
 graph TB
-    A[Frontend Chat Interface] --> B[FastAPI Backend]
-    B --> C[n8n Webhook]
-    C --> C[Google Gemini LLM]
-    C --> D[Supabase Vector Store]
-    C --> I[PostgreSQL Memory]
-    D --> d[Document Embeddings]
-    E --> E[Chat History]
+    A[Frontend Chat UI] --> B[FastAPI Backend]
+    B --> C[n8n Webhook / Orchestrator]
+
+    %% LLM
+    C --> G[Google Gemini (LLM)]
+
+    %% Retrieval
+    C -->|RAG Query| D[(Supabase Vector Store • pgvector)]
+    d[Embedding Worker] -->|Upserts Embeddings| D
+
+    %% Memory & History
+    C <--> I[(PostgreSQL • Session & Long-Term Memory)]
+    I <--> E[Chat History]
+
+    %% Response back to user
+    C -->|Final Reply| B -->|Stream to UI| A
+
+    %% Grouped infra
+    subgraph Supabase
+        D
+        I
+    end
+
 ```
 
 ## 🛠️ Tech Stack
