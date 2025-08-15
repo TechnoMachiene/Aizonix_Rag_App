@@ -19,26 +19,21 @@ graph TB
     A[Frontend Chat UI] --> B[FastAPI Backend]
     B --> C[n8n Webhook / Orchestrator]
 
-    %% LLM
     C --> G[Google Gemini (LLM)]
+    C -->|RAG query| D[Supabase Vector Store (pgvector)]
+    W[Embedding Worker] -->|Upserts embeddings| D
 
-    %% Retrieval
-    C -->|RAG Query| D[(Supabase Vector Store • pgvector)]
-    d[Embedding Worker] -->|Upserts Embeddings| D
+    C <--> I[PostgreSQL (Session & Long-Term Memory)]
+    I --> E[Chat History]
 
-    %% Memory & History
-    C <--> I[(PostgreSQL • Session & Long-Term Memory)]
-    I <--> E[Chat History]
+    C -->|Final reply| B
+    B -->|Stream to UI| A
 
-    %% Response back to user
-    C -->|Final Reply| B -->|Stream to UI| A
-
-    %% Grouped infra
     subgraph Supabase
         D
         I
+        E
     end
-
 ```
 
 ## 🛠️ Tech Stack
