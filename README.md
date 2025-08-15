@@ -18,12 +18,11 @@ An intelligent document-based chatbot system that helps organizations manage FAQ
 graph TB
     A[Frontend Chat Interface] --> B[FastAPI Backend]
     B --> C[n8n Webhook]
-    C --> D[AI Agent with LangChain]
-    D --> E[Google Gemini LLM]
-    D --> F[Supabase Vector Store]
-    D --> G[PostgreSQL Memory]
-    F --> H[Document Embeddings]
-    G --> I[Chat History]
+    C --> C[Google Gemini LLM]
+    C --> D[Supabase Vector Store]
+    C --> I[PostgreSQL Memory]
+    D --> d[Document Embeddings]
+    E --> E[Chat History]
 ```
 
 ## 🛠️ Tech Stack
